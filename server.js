@@ -40,10 +40,47 @@ const server = http.createServer((req, res) => {
       return res.end('Dog Club');
     }
 
-    if (req.method === 'GET' && req.url === '/dogs') {
+    if (req.method === 'GET' && req.url.startsWith('/dogs')) {
+      const urlParts = req.url.split('/'); // split url into parts
+      if (urlParts.length === 3 && !isNaN(urlParts[2])) { // check if dogID exists and is a number
+        const dogId = urlParts[2]; // extract dogID
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        return res.end(`Dog details for dogId: ${dogId}`);
+      }
+    }
+
+    if (req.method === 'GET' && req.url === '/dogs/new') {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/plain');
-      return res.end('Dogs Index');
+      return res.end('Dog create form page');
+    }
+
+    if (req.method === 'POST' && req.url === '/dogs') {
+      const newDogId = getNewDogId(); // generate new dog ID
+      res.statusCode = 302; // status code for redirect
+      res.setHeader('Location', `/dogs/${newDogId}`); // redirect to new dog page
+      return res.end();
+    }
+
+    if (req.method === 'POST' && req.url.startsWith('/dogs/')) {
+      const urlParts = req.url.split('/');
+      if (urlParts.length === 3 && !isNaN(urlParts[2])) { // check if dogId exists and is a number
+        const dogId = urlParts[2];
+        res.statusCode = 302; // status code for redirect
+        res.setHeader('Location', `/dogs/${dogId}`); // redirect to the same dog page
+        return res.end();
+      }
+    }
+
+    if (req.method === 'GET' && req.url.startsWith('/dogs/')) {
+      const urlParts = req.url.split('/');
+      if (urlParts.length === 4 && urlParts[3] === 'edit' && !isNaN(urlParts[2])) {
+        const dogId = urlParts[2];
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        return res.end(`Dog edit form page for dogId: ${dogId}`);
+      }
     }
 
     // Do not edit below this line
